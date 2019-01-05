@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Accelerometr</string>
+    <string name="title_activity_main">Map</string>
+    <string name="bt_start">Press to Start</string>
+</resources>
