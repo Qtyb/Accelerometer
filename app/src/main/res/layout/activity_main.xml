@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:screenOrientation="portrait">
 
 
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,16 +16,31 @@
     tools:context=".MainActivity"
     tools:layout="@layout/activity_main"
     />
-
+    <TextView
+        android:id="@+id/tv_measurment_id"
+        android:layout_width="match_parent"
+        android:layout_height="80px"
+        android:layout_alignParentBottom="true"
+        android:textColor="#ffffff"
+        android:background="@color/colorPrimaryDark"
+        android:text="Pomiary"
+        />
+    <TextView
+        android:id="@+id/tv_start_id"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDark"
+        />
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/bt_start_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#359c5e"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
+        android:background="@color/colorPrimary"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:padding="8dp"
         android:layout_margin="5dp"
         android:text="@string/bt_start"
         android:textColor="#ffffff" />
+
 </RelativeLayout>
