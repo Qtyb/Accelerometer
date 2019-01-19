@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:screenOrientation="portrait">
 
-
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -14,23 +13,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    tools:layout="@layout/activity_main"
-    />
+    tools:layout="@layout/activity_main" />
     <TextView
         android:id="@+id/tv_measurment_id"
         android:layout_width="match_parent"
-        android:layout_height="80px"
+        android:layout_height="20dp"
         android:layout_alignParentBottom="true"
         android:textColor="#ffffff"
         android:background="@color/colorPrimaryDark"
-        android:text="Pomiary"
-        />
+        android:text="Pomiary" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp">
+        <Button
+            android:id="@+id/bt_renew_id"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:padding="4dp"
+            android:text="@string/bt_renew"
+            android:textColor="#ffffff"
+            android:visibility="invisible"
+            android:layout_weight="1"/>
+        <Button
+            android:id="@+id/bt_race_id"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:padding="4dp"
+            android:text="@string/bt_race"
+            android:visibility="invisible"
+            android:textColor="#ffffff"
+            android:layout_weight="1"/>
+    </LinearLayout>
     <TextView
         android:id="@+id/tv_start_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimaryDark"
-        />
+        android:background="@color/colorPrimaryDark" />
     <Button
         android:id="@+id/bt_start_id"
         android:layout_width="wrap_content"
@@ -42,5 +64,4 @@
         android:layout_margin="5dp"
         android:text="@string/bt_start"
         android:textColor="#ffffff" />
-
 </RelativeLayout>

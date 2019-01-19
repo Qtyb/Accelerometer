@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Accelerometr</string>
-    <string name="title_activity_main">Map</string>
+    <string name="title_activity_main">AccelIT</string>
     <string name="bt_start">Press to Start</string>
+    <string name="bt_renew">Restart</string>
+    <string name="bt_race">Let\'s Race</string>
 </resources>

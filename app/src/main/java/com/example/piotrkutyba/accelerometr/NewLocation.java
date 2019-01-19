@@ -102,8 +102,8 @@ public class NewLocation {
 
         //liczenie szerokosci geograficznej
         // z twierdzenia cosinusow
-        deltaFi = ((Math.pow(delta_y,2) - 2 * Math.pow(EarthRadius,2))/(-2 * Math.pow(EarthRadius,2)))/(57.29578*1000*2);
-        if(x_acceleration>0.5){
+        deltaFi = ((Math.pow(delta_y,2) - 2 * Math.pow(EarthRadius,2))/(-2 * Math.pow(EarthRadius,2)))/(57.29578*1000);
+        if(x_acceleration>0.8){
             MainActivity.coordinates.latitude += deltaFi;
         }else{
 
@@ -126,8 +126,8 @@ public class NewLocation {
 
 
         // z tw cosinusow
-        if(y_acceleartion>0.5){
-            MainActivity.coordinates.longitude += Math.asin((Math.pow(x_2,2)-Math.pow(y,2)-Math.pow(part,2))/(2*y*part))/(57.29578*1000*2);
+        if(y_acceleartion>0.8){
+            MainActivity.coordinates.longitude += Math.asin((Math.pow(x_2,2)-Math.pow(y,2)-Math.pow(part,2))/(2*y*part))/(57.29578*1000);
         }else{
 
         }
