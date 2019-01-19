@@ -15,6 +15,9 @@ public class NewLocation {
     // jakas funkcja do
     // uzyskiwania wspolrzednych
 
+    double initialVelocityX = 0;
+    double initialVelocityY = 0;
+
     public Coordinates getNewLocation(double x_acceleration, double y_acceleartion, double z_acceleartion) throws InterruptedException {
     //    Log.d("NewLocation: ","getNewLocation Start");
         //całkowanie metodą trapezów (byloby, ale w tej wersji nie tutaj :D)
@@ -58,8 +61,8 @@ public class NewLocation {
                 acceleration_X[i] = MainActivity.sensorXAcc; // Oś Y jest pionowa, na razie zbędna
                 acceleration_y[i] = MainActivity.sensorZAcc;
             }
-            temp_vel_X = 0;
-            temp_vel_y = 0;
+            temp_vel_X = initialVelocityX;
+            temp_vel_y = initialVelocityY;
 
             for (int j = 0; j <= i; j++){
                 if(j == 0 || j == i) {
@@ -77,6 +80,9 @@ public class NewLocation {
             //TimeUnit.SECONDS.sleep(timeSleep);
             Thread.sleep(timeSleep);
         }
+
+        initialVelocityX = velocity_X[8];
+        initialVelocityY = velocity_Y[8];
 
         //uzyskiewanie przebytej drogi metoda calkoawnia numerycznego
 
