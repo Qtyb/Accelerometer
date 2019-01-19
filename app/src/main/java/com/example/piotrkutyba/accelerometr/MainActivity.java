@@ -48,44 +48,36 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
     public  static float sensorXAcc;  // prawo lewo
     public  static float sensorYAcc; //góra dół, nieptrzebna dla nas
     public  static float sensorZAcc; //Przód tył
-    private Boolean mStarted;
+    private float tmpSensorXAcc;  // prawo lewo
+    private float tmpSensorYAcc; //góra dół, nieptrzebna dla nas
+    private float tmpSensorZAcc; //Przód tył
     private NewLocation mNewLocation;
-    private Marker[] mMarkerArray;
     public TextView measurement;
-
+    private Boolean mStarted;
+    private Marker[] mMarkerArray;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        Log.d("SensorReader: ","Constructor");
         mStarted = false;
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGravityAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+        measurement = new TextView(this);
 
+        //TODO Tablica z markerami
         mNewLocation = new NewLocation();
         mMarkerArray = new Marker[5];
-        measurement = new TextView(this);
-    }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+    }
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        Log.d("MainActivity: ", "Map is ready");
+        Log.d("INFO: ", "MainActivity.onMapReady: Map is ready");
         setDynamicLayout();
         mMap = googleMap;
 
@@ -97,37 +89,28 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
             try {
                 TimeUnit.SECONDS.wait(1000);
             }catch (Exception e){
-                Log.d("Excepttion","MainActivity.onMapReady Exception:" + e.toString());
+                Log.d("EXCEPTION: ","MainActivity.onMapReady: " + e.toString());
             }
             android.os.Process.killProcess(android.os.Process.myPid());
             System.exit(1);
         }
 
         coordinates = new Coordinates();
-
         getCurrentLocation();
-
-        // Add a marker in Sydney and move the camera
-       // LatLng sydney = new LatLng(-34, 151);
-       // mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-      //  mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
-    }
+        }
 
     public void getCurrentLocation() {
-        Log.d("MainActivity: ", "getDeviceLocation: getting the devices current location");
-
+        Log.d("INFO: ", "MainActivity.getCurrentLocation: getting the devices current location");
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(MainActivity.this, "Brak uprawnień", Toast.LENGTH_SHORT).show();
-            Log.d("MainActivity: ", "onMapReady: No permission");
+            Log.d("INFO: ", "MainActivity.getCurrentLocation: No permission");
             try {
-                TimeUnit.SECONDS.wait(1000);
-            }catch (Exception e){
-            }
-           // android.os.Process.killProcess(android.os.Process.myPid());
-           // System.exit(1);
+                TimeUnit.SECONDS.wait(5000);
+            }catch (Exception e){}
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(1);
             return;
         }
         final Task location = mFusedLocationProviderClient.getLastLocation();
@@ -135,22 +118,26 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onComplete(@NonNull Task task) {
                 if(task.isSuccessful()){
-                    Log.d("MainActivity: ","onComplete: found location!");
+                    Log.d("INFO: ","MainActivity.getCurrentLocation: found location!");
                     Location currentLocation = (Location) task.getResult();
-
-                    moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), DEFAULT_ZOOM);
-                    mMap.addMarker(new MarkerOptions().position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())).title("Starting Position"));
-                    coordinates.longitude = currentLocation.getLongitude();
-                    coordinates.latitude = currentLocation.getLatitude();
+                    try{
+                        moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), DEFAULT_ZOOM);
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())).title("Starting Position"));
+                        coordinates.longitude = currentLocation.getLongitude();
+                        coordinates.latitude = currentLocation.getLatitude();
+                    }
+                    catch (Exception e){
+                        Log.d("EXCEPTION: ","MainActivity.getCurrentLocation: " + e.getMessage());
+                    }
                 }else{
-                    Log.d("MainActivity: ", "onComplete: current location is null");
+                    Log.d("INFO: ", "MainActivity.getCurrentLocation: current location is null");
                     Toast.makeText(MainActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
     public void moveCamera(LatLng latLng, float zoom){
-        Log.d("MainActivity: ", "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
+        Log.d("INFO: ", "moveCamera: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
     private void updatePosition(){
@@ -165,7 +152,7 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         }
         catch (Exception e) {
-            Log.d("updatePosition: ", String.format("Excepction: %s", e.getMessage()));
+            Log.d("EXCEPTION: ", String.format("updatePosition: %s", e.getMessage()));
         }
     }
     private void setDynamicLayout(){
@@ -204,11 +191,21 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
     }
     @Override
     public void onSensorChanged(SensorEvent event) {
-        sensorXAcc = event.values[0];  // prawo lewo
-        sensorYAcc = event.values[1]; //góra dół, nieptrzebna dla nas
-        sensorZAcc = event.values[2];
-        measurement.setText("Oś x: " + sensorXAcc + "  Oś y: " + sensorYAcc + "  Oś z:" + sensorZAcc);
-        Log.d("INFO: ","SensorsReader:  " + sensorXAcc +" , "+ sensorYAcc +" , "+ sensorZAcc);
+        if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE){
+
+        }
+        if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
+            sensorXAcc = tmpSensorXAcc - event.values[0];  // prawo lewo
+            sensorYAcc = tmpSensorYAcc - event.values[1]; //góra dół, nieptrzebna dla nas
+            sensorZAcc = tmpSensorZAcc - event.values[2];
+            measurement.setText("Oś x: " + sensorXAcc + "  Oś y: " + sensorYAcc + "  Oś z:" + sensorZAcc);
+            Log.d("DEBUG: ","SensorsReader Gravity:  " + event.values[0] +" , "+ event.values[1] +" , "+ event.values[2]);
+        }
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+            tmpSensorXAcc = event.values[0];  // prawo lewo
+            tmpSensorYAcc = event.values[1]; //góra dół, nieptrzebna dla nas
+            tmpSensorZAcc = event.values[2];
+            Log.d("DEBUG: ","SensorsReader TYPE_ACCELEROMETER:  " + event.values[0] +" , "+ event.values[1] +" , "+ event.values[2]);
     }
 
     @Override
