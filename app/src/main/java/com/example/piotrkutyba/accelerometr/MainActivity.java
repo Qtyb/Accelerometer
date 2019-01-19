@@ -43,6 +43,7 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
     public static Coordinates coordinates;
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
+    private Sensor mGravityAccelerometer;
     private int mSensorCounter;
     public  static float sensorXAcc;  // prawo lewo
     public  static float sensorYAcc; //góra dół, nieptrzebna dla nas
@@ -65,6 +66,8 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         mStarted = false;
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mGravityAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+
         mNewLocation = new NewLocation();
         mMarkerArray = new Marker[5];
         measurement = new TextView(this);
@@ -150,6 +153,21 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         Log.d("MainActivity: ", "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
+    private void updatePosition(){
+        try{
+            mSensorCounter++;
+            if(mSensorCounter%59==0)
+                mMap.clear();
+            mNewLocation.getNewLocation(sensorXAcc,sensorZAcc,sensorYAcc);
+            if(mSensorCounter%2==0) {
+                moveCamera(new LatLng(coordinates.latitude, coordinates.longitude),DEFAULT_ZOOM);
+                mMap.addMarker(new MarkerOptions().position(new LatLng(coordinates.latitude, coordinates.longitude)));
+            }
+        }
+        catch (Exception e) {
+            Log.d("updatePosition: ", String.format("Excepction: %s", e.getMessage()));
+        }
+    }
     private void setDynamicLayout(){
         final Button startButton;
         final TextView dimmerTV;
@@ -162,35 +180,16 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         {
             public void onClick(View view)
             {
-                Toast.makeText(MainActivity.this, "Witam", Toast.LENGTH_SHORT).show();
                 mStarted = true;
                 startButton.setVisibility(View.GONE);
                 dimmerTV.setVisibility(View.GONE);
                 final Handler handler = new Handler();
                 Runnable runnable = new Runnable() {
-
                     @Override
                     public void run() {
-                        try{
-                            mSensorCounter++;
-                            if(mSensorCounter%59==0)
-                                mMap.clear();
-                            mNewLocation.getNewLocation(sensorXAcc,sensorZAcc,sensorYAcc);
-                            if(mSensorCounter%2==0) {
-                                moveCamera(new LatLng(coordinates.latitude, coordinates.longitude),DEFAULT_ZOOM);
-                                mMap.addMarker(new MarkerOptions().position(new LatLng(coordinates.latitude, coordinates.longitude)));
-
-                            }
+                        updatePosition();
+                        handler.postDelayed(this, 1000);
                         }
-                        catch (Exception e) {
-                            // TODO: handle exception
-                            Log.d("Interval EXCEPTION: ",e.getMessage());
-                        }
-                        finally{
-                            //also call the same runnable to call it at regular interval
-                            handler.postDelayed(this, 1000);
-                        }
-                    }
                 };
                 handler.post(runnable);
             }
@@ -198,9 +197,9 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
     }
     @Override
     protected void onResume() {
-        Log.d("SensorReader: ","onResume");
-
+        Log.d("INFO: ","SensorsReader: onResume");
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mGravityAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         super.onResume();
     }
     @Override
@@ -209,11 +208,11 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         sensorYAcc = event.values[1]; //góra dół, nieptrzebna dla nas
         sensorZAcc = event.values[2];
         measurement.setText("Oś x: " + sensorXAcc + "  Oś y: " + sensorYAcc + "  Oś z:" + sensorZAcc);
-        Log.d("SensorReader: ","onSensorChanged " + sensorXAcc +" , "+ sensorYAcc +" , "+ sensorZAcc);
+        Log.d("INFO: ","SensorsReader:  " + sensorXAcc +" , "+ sensorYAcc +" , "+ sensorZAcc);
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        Log.d("SensorReader: ","onAccuracyChanged");
+        Log.d("INFO: ","SensorsReader: onAccuracyChanged");
     }
 }
