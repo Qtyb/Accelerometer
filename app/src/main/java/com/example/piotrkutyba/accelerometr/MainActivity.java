@@ -17,7 +17,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,6 +68,14 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
     private TextView stopWatchTV;
     private RaceStatus raceChecker;
 
+
+    //magnietic
+    private ImageView imageView;
+    private float[] mGravity = new float[3];
+    private float[] mGeomagnetic = new float[3];
+    private float azimuth = 0f;
+    private float currentAzimuth = 0f;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +96,11 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
 
         //TODO Tablica z markerami
         mMarkerArray = new Marker[5];
+
+
+        //magnetic
+        imageView = (ImageView)findViewById(R.id.compass);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
     }
     @Override
@@ -289,6 +305,13 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mGravityAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         super.onResume();
+
+        //magnetic
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+                SensorManager.SENSOR_DELAY_GAME);
+
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_GAME);
     }
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -308,9 +331,79 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
             tmpSensorZAcc = event.values[2];
          //   Log.d("DEBUG: ","ACCELEROMETER:  x: " + event.values[0] +" , y: "+ event.values[1] +" , z: "+ event.values[2]);
         }
+
+        //magnetic
+        final float alpha = 0.97f;
+        synchronized (this) {
+
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+                mGravity[0] = alpha * mGravity[0] + (1-alpha) * event.values[0];  //przyspieszenie
+                mGravity[1] = alpha + mGravity[1] + (1-alpha) * event.values[1];   //ziemskie w 3
+                mGravity[2] = alpha + mGravity[2] + (1-alpha) * event.values[2];    //kierunkach
+            }
+
+            if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
+                mGeomagnetic[0] = alpha * mGeomagnetic[0] + (1-alpha) * event.values[0]; //pole
+                mGeomagnetic[1] = alpha + mGeomagnetic[1] + (1-alpha) * event.values[1];//magnetyczne
+                mGeomagnetic[2] = alpha + mGeomagnetic[2] + (1-alpha) * event.values[2];// w 3 kierunkach
+
+
+                //    Log.d("magnetic", "MAGNETIC Y: " + event.values[0] + " MAGNETIC X: "
+                //          + event.values[1] + " MAGNETIC Z: " + event.values[2]);
+            }
+
+            float R[] = new float[9]; // macierz rotacji, gdy układ współrzędnych urządzenia
+            // jest taki jak układ współrzędnych ziemi
+
+            float I[] = new float[9]; // macierz rotacji dopasowana do układu współrzędnych urządzenia
+
+
+            boolean success = SensorManager.getRotationMatrix(R,I,mGravity,mGeomagnetic);
+            // nieprawda np. gdy urządzenie jest w swobodnym spadku
+
+            if(success){
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(R,orientation);
+                azimuth = (float)Math.toDegrees(orientation[0]); // kat wokol osi z (raczej mnie nie obchodzi)
+                azimuth = (azimuth+360) % 360;
+
+                // Log.i("Orientation:", "orientation Y: " + Math.toDegrees(orientation[0]) +
+                //       " orientation X: " + Math.toDegrees(orientation[1]) + " orientation Z: " + Math.toDegrees(orientation[2]));
+
+
+                //animacja kompasu
+                Animation anim = new RotateAnimation(-currentAzimuth, -azimuth,
+                        Animation.RELATIVE_TO_SELF, 0.5f,Animation.RELATIVE_TO_SELF, 0.5f);
+
+                //public RotateAnimation (float fromDegrees,
+                //                float toDegrees,
+                //                int pivotXType,
+                //                float pivotXValue,
+                //                int pivotYType,
+                //                float pivotYValue)
+
+
+                currentAzimuth = azimuth;
+
+                anim.setDuration(300); //czas trwania animacji
+                anim.setRepeatCount(0); // ile razy animacja powinna zostac powtorzona
+                anim.setFillAfter(false); // prawda sprawia, że animacja rozciaga sie w czasie
+
+                imageView.startAnimation(anim);
+            }
+
+
+        }
     }
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         Log.d("INFO: ","SensorsReader: onAccuracyChanged");
+    }
+
+    //magnetic
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this);
     }
 }
