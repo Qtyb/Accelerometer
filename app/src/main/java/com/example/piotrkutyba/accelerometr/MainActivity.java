@@ -75,6 +75,7 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
     private float[] mGeomagnetic = new float[3];
     private float azimuth = 0f;
     private float currentAzimuth = 0f;
+    float orientation[] = new float[3];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,7 +184,8 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
                         .width(5)
                         .color(Color.RED));
             }
-            mNewLocation.getNewLocation(sensorXAcc,sensorZAcc,sensorYAcc);
+            mNewLocation.getNewLocation(Math.sin(Math.toDegrees(orientation[2]))*sensorXAcc,
+                    Math.cos(Math.toDegrees(orientation[2]))*sensorZAcc,sensorYAcc);
             if(mSensorCounter%2==0) {
                 moveCamera(new LatLng(coordinates.latitude, coordinates.longitude),DEFAULT_ZOOM);
                 if(mRaceStarted) {
@@ -362,13 +364,13 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
             // nieprawda np. gdy urządzenie jest w swobodnym spadku
 
             if(success){
-                float orientation[] = new float[3];
+
                 SensorManager.getOrientation(R,orientation);
                 azimuth = (float)Math.toDegrees(orientation[0]); // kat wokol osi z (raczej mnie nie obchodzi)
                 azimuth = (azimuth+360) % 360;
 
                 // Log.i("Orientation:", "orientation Y: " + Math.toDegrees(orientation[0]) +
-                //       " orientation X: " + Math.toDegrees(orientation[1]) + " orientation Z: " + Math.toDegrees(orientation[2]));
+                 //      " orientation X: " + Math.toDegrees(orientation[1]) + " orientation Z: " + Math.toDegrees(orientation[2]));
 
 
                 //animacja kompasu
