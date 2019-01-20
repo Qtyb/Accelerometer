@@ -42,6 +42,8 @@ import com.google.android.gms.tasks.Task;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.Math.sin;
+
 public class  MainActivity extends FragmentActivity implements OnMapReadyCallback, SensorEventListener {
 
     private GoogleMap mMap;
@@ -184,8 +186,7 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
                         .width(5)
                         .color(Color.RED));
             }
-            mNewLocation.getNewLocation(Math.sin(Math.toDegrees(orientation[2]))*sensorXAcc,
-                    Math.cos(Math.toDegrees(orientation[2]))*sensorZAcc,sensorYAcc);
+            mNewLocation.getNewLocation(sensorXAcc, sensorZAcc,sensorXAcc);
             if(mSensorCounter%2==0) {
                 moveCamera(new LatLng(coordinates.latitude, coordinates.longitude),DEFAULT_ZOOM);
                 if(mRaceStarted) {
@@ -369,8 +370,8 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
                 azimuth = (float)Math.toDegrees(orientation[0]); // kat wokol osi z (raczej mnie nie obchodzi)
                 azimuth = (azimuth+360) % 360;
 
-                // Log.i("Orientation:", "orientation Y: " + Math.toDegrees(orientation[0]) +
-                 //      " orientation X: " + Math.toDegrees(orientation[1]) + " orientation Z: " + Math.toDegrees(orientation[2]));
+              //   Log.i("Orientation:", "orientation Y: " + Math.toDegrees(orientation[0]) +
+                //       " orientation X: " + Math.toDegrees(orientation[1]) + " orientation Z: " + Math.toDegrees(orientation[2]));
 
 
                 //animacja kompasu
