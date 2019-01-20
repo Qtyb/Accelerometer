@@ -87,10 +87,10 @@
         android:text="@string/bt_start"
         android:textColor="#ffffff" />
     <ImageView
-        android:id="@+id/compass"
+        android:id="@+id/transparent_compass"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:src="@drawable/compass"
+        android:src="@drawable/transparent_compass"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp" />
 </RelativeLayout>
