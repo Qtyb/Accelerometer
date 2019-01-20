@@ -387,9 +387,9 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
 
                 currentAzimuth = azimuth;
 
-                anim.setDuration(300); //czas trwania animacji
+                anim.setDuration(500); //czas trwania animacji
                 anim.setRepeatCount(0); // ile razy animacja powinna zostac powtorzona
-                anim.setFillAfter(false); // prawda sprawia, że animacja rozciaga sie w czasie
+                anim.setFillAfter(true); // prawda sprawia, że animacja rozciaga sie w czasie
 
                 imageView.startAnimation(anim);
             }
