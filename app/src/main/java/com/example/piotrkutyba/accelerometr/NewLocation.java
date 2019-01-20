@@ -15,8 +15,8 @@ public class NewLocation {
     // jakas funkcja do
     // uzyskiwania wspolrzednych
 
-    double initialVelocityX = 0;
-    double initialVelocityY = 0;
+  //  double initialVelocityX = 0;
+  //  double initialVelocityY = 0;
 
     public Coordinates getNewLocation(double x_acceleration, double y_acceleartion, double z_acceleartion) throws InterruptedException {
     //    Log.d("NewLocation: ","getNewLocation Start");
@@ -61,8 +61,8 @@ public class NewLocation {
                 acceleration_X[i] = MainActivity.sensorXAcc; // Oś Y jest pionowa, na razie zbędna
                 acceleration_y[i] = MainActivity.sensorZAcc;
             }
-            temp_vel_X = initialVelocityX;
-            temp_vel_y = initialVelocityY;
+            temp_vel_X = 0;
+            temp_vel_y = 0;
 
             for (int j = 0; j <= i; j++){
                 if(j == 0 || j == i) {
@@ -81,8 +81,8 @@ public class NewLocation {
             Thread.sleep(timeSleep);
         }
 
-        initialVelocityX = velocity_X[8];
-        initialVelocityY = velocity_Y[8];
+     //   initialVelocityX = velocity_X[8];
+      //  initialVelocityY = velocity_Y[8];
 
         //uzyskiewanie przebytej drogi metoda calkoawnia numerycznego
 
@@ -109,11 +109,9 @@ public class NewLocation {
         //liczenie szerokosci geograficznej
         // z twierdzenia cosinusow
         deltaFi = ((Math.pow(delta_y,2) - 2 * Math.pow(EarthRadius,2))/(-2 * Math.pow(EarthRadius,2)))/(57.29578*1000);
-        if(x_acceleration>0.8){
+        if(x_acceleration>0.8)
             MainActivity.coordinates.latitude += deltaFi;
-        }else{
 
-        }
 
         //liczenie dlugosci geograficznej
 
@@ -132,11 +130,9 @@ public class NewLocation {
 
 
         // z tw cosinusow
-        if(y_acceleartion>0.8){
+        if(y_acceleartion>0.8)
             MainActivity.coordinates.longitude += Math.asin((Math.pow(x_2,2)-Math.pow(y,2)-Math.pow(part,2))/(2*y*part))/(57.29578*1000);
-        }else{
 
-        }
         return MainActivity.coordinates;
     }
 }

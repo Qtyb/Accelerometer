@@ -59,8 +59,11 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
     public TextView measurement;
     private Marker mRaceMarker;
     private Polyline mRacePolyline;
-    private Boolean mStarted;
+    private Boolean mRaceStarted;
+    private Stopwatch mStopwatch;
     private Marker[] mMarkerArray;
+    private TextView stopWatchTV;
+    private RaceStatus raceChecker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,13 +73,15 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        mStarted = false;
+        mRaceStarted = false;
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGravityAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
 
         measurement = new TextView(this);
+        mStopwatch = new Stopwatch();
         mNewLocation = new NewLocation();
+        raceChecker = new RaceStatus();
 
         //TODO Tablica z markerami
         mMarkerArray = new Marker[5];
@@ -89,9 +94,7 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         setDynamicLayout();
         mMap = googleMap;
 
-        if (!(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-            mMap.setMyLocationEnabled(true);
-        }else{
+        if ((ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
             Toast.makeText(MainActivity.this, "Brak uprawnień", Toast.LENGTH_SHORT).show();
             Log.d("MainActivity: ", "onMapReady: No permission");
             try {
@@ -102,7 +105,6 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
             android.os.Process.killProcess(android.os.Process.myPid());
             System.exit(1);
         }
-
         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener(){
             @Override
             public void onMapLongClick(LatLng position) {
@@ -160,20 +162,42 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
             if(mSensorCounter%59==0) {
                 mMap.clear();
                 mRaceMarker = mMap.addMarker(new MarkerOptions().position(mRaceMarker.getPosition()).title("Finish").icon(BitmapDescriptorFactory.fromResource(R.drawable.finish)));
+                mRacePolyline = mRacePolyline = mMap.addPolyline(new PolylineOptions()
+                        .add(mRacePolyline.getPoints().get(0),mRacePolyline.getPoints().get(1))
+                        .width(5)
+                        .color(Color.RED));
             }
             mNewLocation.getNewLocation(sensorXAcc,sensorZAcc,sensorYAcc);
             if(mSensorCounter%2==0) {
                 moveCamera(new LatLng(coordinates.latitude, coordinates.longitude),DEFAULT_ZOOM);
-                mMap.addMarker(new MarkerOptions().position(new LatLng(coordinates.latitude, coordinates.longitude)));
+                if(mRaceStarted) {
+                    if (raceChecker.checkRaceStatus(new LatLng(coordinates.latitude, coordinates.longitude), mRaceMarker.getPosition(), 0.00007)) {
+                        mRaceMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.trophy));
+                    }
+                }mMap.addMarker(new MarkerOptions().position(new LatLng(coordinates.latitude, coordinates.longitude)));
             }
         }
         catch (Exception e) {
             Log.d("EXCEPTION: ", String.format("updatePosition: %s", e.getMessage()));
         }
     }
+    private void reset(){
+        try{
+            mRaceStarted = false;
+            mRaceMarker = null;
+            mRacePolyline = null;
+            stopWatchTV.setVisibility(View.INVISIBLE);
+            mStopwatch.resetStopwatch();
+            mMap.clear();
+        }catch (Exception e){
+            Toast.makeText(MainActivity.this, "reset EXCEPTION: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.d("EXCEPTION: ", String.format("reset: %s", e.getMessage()));
+        }
+    }
     private void setDynamicLayout(){
         final Button startButton;
         final Button renewButton;
+        final Button backButton;
         final Button startRaceButton;
         final TextView dimmerTV;
 
@@ -182,7 +206,20 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         dimmerTV = (TextView)findViewById(R.id.tv_start_id);
         renewButton = (Button)findViewById(R.id.bt_renew_id);
         startRaceButton = (Button)findViewById(R.id.bt_race_id);
+        stopWatchTV = (TextView)findViewById(R.id.tv_stopWatch_id);
+        backButton = (Button)findViewById(R.id.bt_back_id);
 
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRaceButton.setVisibility(View.GONE);
+                renewButton.setVisibility(View.GONE);
+                backButton.setVisibility(View.GONE);
+                startButton.setVisibility(View.VISIBLE);
+                dimmerTV.setVisibility(View.VISIBLE);
+                reset();
+            }
+        });
         startRaceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -191,6 +228,14 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
                             .add(new LatLng(coordinates.latitude, coordinates.longitude), new LatLng(mRaceMarker.getPosition().latitude,mRaceMarker.getPosition().longitude))
                             .width(5)
                             .color(Color.RED));
+                    mStopwatch.turnOnStopwatch();
+                    mRaceStarted = true;
+                    startRaceButton.setEnabled(false);
+                    startRaceButton.setBackgroundColor(getResources().getColor(R.color.Disabled));
+                    backButton.setEnabled(false);
+                    backButton.setBackgroundColor(getResources().getColor(R.color.Disabled));
+                    stopWatchTV.setVisibility(View.VISIBLE);
+
                 }catch (Exception e){
                     Toast.makeText(MainActivity.this, "startRace EXCEPTION: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     Log.d("EXCEPTION: ", String.format("startRace: %s", e.getMessage()));
@@ -202,19 +247,26 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         renewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mRaceMarker = null;
-                mRacePolyline = null;
-                mMap.clear();
-                getCurrentLocation();
+                try{
+                    reset();
+                    startRaceButton.setEnabled(true);
+                    startRaceButton.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    backButton.setEnabled(true);
+                    backButton.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    getCurrentLocation();
+                }catch (Exception e){
+                    Toast.makeText(MainActivity.this, "renew EXCEPTION: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.d("EXCEPTION: ", String.format("renew: %s", e.getMessage()));
+                }
             }
         });
         startButton.setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View view)
             {
-                mStarted = true;
                 startRaceButton.setVisibility(View.VISIBLE);
                 renewButton.setVisibility(View.VISIBLE);
+                backButton.setVisibility(View.VISIBLE);
                 startButton.setVisibility(View.GONE);
                 dimmerTV.setVisibility(View.GONE);
                 final Handler handler = new Handler();
@@ -222,6 +274,8 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
                     @Override
                     public void run() {
                         updatePosition();
+                        if(mRaceStarted)
+                            stopWatchTV.setText(mStopwatch.printForStopWatch());
                         handler.postDelayed(this, 1000);
                         }
                 };
@@ -246,13 +300,13 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
             sensorYAcc = tmpSensorYAcc - Math.abs(event.values[1]); //góra dół, nieptrzebna dla nas
             sensorZAcc = tmpSensorZAcc - Math.abs(event.values[2]);
             measurement.setText("Oś x: " + sensorXAcc + "  Oś y: " + sensorYAcc + "  Oś z:" + sensorZAcc);
-            Log.d("DEBUG: ","Gravity:  " + event.values[0] +" , "+ event.values[1] +" , "+ event.values[2]);
+        //    Log.d("DEBUG: ","Gravity:  " + event.values[0] +" , "+ event.values[1] +" , "+ event.values[2]);
         }
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
             tmpSensorXAcc = event.values[0];  // prawo lewo
             tmpSensorYAcc = event.values[1]; //góra dół, nieptrzebna dla nas
             tmpSensorZAcc = event.values[2];
-            Log.d("DEBUG: ","ACCELEROMETER:  x: " + event.values[0] +" , y: "+ event.values[1] +" , z: "+ event.values[2]);
+         //   Log.d("DEBUG: ","ACCELEROMETER:  x: " + event.values[0] +" , y: "+ event.values[1] +" , z: "+ event.values[2]);
         }
     }
     @Override
