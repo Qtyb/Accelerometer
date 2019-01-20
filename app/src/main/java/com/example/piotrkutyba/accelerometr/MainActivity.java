@@ -100,7 +100,7 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
 
 
         //magnetic
-        imageView = (ImageView)findViewById(R.id.transparent_compass);
+        imageView = (ImageView)findViewById(R.id.transparent_compass2);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
     }
