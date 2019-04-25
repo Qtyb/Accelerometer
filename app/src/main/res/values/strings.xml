@@ -5,4 +5,6 @@
     <string name="bt_renew">Restart</string>
     <string name="bt_race">Let\'s Race</string>
     <string name="bt_back">Back</string>
+    <string name="bt_rwActivity">Check your races</string>
+
 </resources>

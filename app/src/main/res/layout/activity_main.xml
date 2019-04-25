@@ -77,7 +77,7 @@
         android:background="@color/colorPrimaryDark" />
     <Button
         android:id="@+id/bt_start_id"
-        android:layout_width="wrap_content"
+        android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:layout_centerHorizontal="true"
@@ -85,6 +85,16 @@
         android:padding="8dp"
         android:layout_margin="5dp"
         android:text="@string/bt_start"
+        android:textColor="#ffffff" />
+    <Button
+        android:id="@+id/bt_rwActivity"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:layout_centerHorizontal="true"
+        android:padding="5dp"
+        android:layout_marginTop="360dp"
+        android:text="@string/bt_rwActivity"
         android:textColor="#ffffff" />
     <ImageView
         android:id="@+id/transparent_compass2"

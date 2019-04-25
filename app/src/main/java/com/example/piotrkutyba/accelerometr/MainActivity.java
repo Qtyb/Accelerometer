@@ -1,6 +1,7 @@
 package com.example.piotrkutyba.accelerometr;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -66,7 +67,7 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
     private Polyline mRacePolyline;
     private Boolean mRaceStarted;
     private Stopwatch mStopwatch;
-    private Marker[] mMarkerArray;
+   // private Marker[] mMarkerArray;
     private TextView stopWatchTV;
     private RaceStatus raceChecker;
 
@@ -98,7 +99,7 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         raceChecker = new RaceStatus();
 
         //TODO Tablica z markerami
-        mMarkerArray = new Marker[5];
+        //mMarkerArray = new Marker[5];
 
 
         //magnetic
@@ -218,16 +219,24 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
         final Button renewButton;
         final Button backButton;
         final Button startRaceButton;
+        final Button changeRwActivity;
         final TextView dimmerTV;
 
         measurement = (TextView)findViewById(R.id.tv_measurment_id);
         startButton = (Button)findViewById(R.id.bt_start_id);
+        changeRwActivity = (Button)findViewById(R.id.bt_rwActivity);
         dimmerTV = (TextView)findViewById(R.id.tv_start_id);
         renewButton = (Button)findViewById(R.id.bt_renew_id);
         startRaceButton = (Button)findViewById(R.id.bt_race_id);
         stopWatchTV = (TextView)findViewById(R.id.tv_stopWatch_id);
         backButton = (Button)findViewById(R.id.bt_back_id);
 
+        changeRwActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    openRwActivity();
+            }
+        });
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -301,6 +310,10 @@ public class  MainActivity extends FragmentActivity implements OnMapReadyCallbac
                 handler.post(runnable);
             }
         });
+    }
+    private void openRwActivity(){
+        Intent intent = new Intent(this,ReadWriteActivity.class);
+        startActivity(intent);
     }
     @Override
     protected void onResume() {
